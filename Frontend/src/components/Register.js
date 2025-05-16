@@ -21,13 +21,38 @@ const LoginForm = () => {
   };
 const navigate = useNavigate();
 
-const handleSubmit = (e) => {
+const handleSubmit = async (e) => {
   e.preventDefault();
   console.log(formData);
-  // Aquí iría la lógica de envío al backend
+   try {
+      const response = await fetch('/api/auth/register', { // <-- ¡Asegúrate de que la URL sea esta!
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Registro exitoso:', data);
+        // Redirigir al usuario a la página de inicio de sesión o mostrar un mensaje de éxito
+        navigate('/login');
+      } else {
+        const errorData = await response.json();
+        console.error('Error al registrar:', errorData);
+        // Mostrar un mensaje de error al usuario
+      }
+    } catch (error) {
+      console.error('Error de red:', error);
+      // Mostrar un mensaje de error de red al usuario
+    }
+    // Redirige al login después del registro (esto se duplicará si la llamada a la API es exitosa)
+    // navigate('/login');
+
 
   // Redirige al login después del registro
-  navigate('/login');
+ 
 };
   
 
