@@ -1,9 +1,19 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import '../styles/Start.css'; // Cambié el nombre de los estilos a Start.css
 
 const Start = () => {
+ const navigate = useNavigate();
+
   const handleButtonClick = (section) => {
-    console.log(`Navegar a: ${section}`);
+    switch (section) {
+      case 'inventario':
+        navigate('/inventory');
+        break;
+      // Agrega otros casos para pedidos, proveedores, etc.
+      default:
+        console.log(`Sección no reconocida: ${section}`);
+    }
     // Aquí podrías usar navigate(`/ruta`) si usas react-router
   };
 

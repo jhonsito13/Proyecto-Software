@@ -1,13 +1,14 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const pool = require('../config/db');
-
+//hola
 // Función para el registro de nuevos usuarios
 exports.register = async (req, res) => {
   
-  const { firstName, lastName, email, password, role } = req.body; // Ajusta los nombres según tu formulario
+  const { nombre_usuario, apellido, email, password, rol_id,empleado_id } = req.body; // Ajusta los nombres según tu formulario
   
   try {
+    console.log('Datos recibidos en registro:', req.body);
     // Verificar si el usuario ya existe por email (o nombre de usuario, según tu lógica)
     const [existingUser] = await pool.query('SELECT * FROM usuarios WHERE email = ?', [email]); // O WHERE nombre_usuario = ?
 
@@ -19,17 +20,20 @@ exports.register = async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    // Insertar el nuevo usuario en la base de datos
-    const [result] = await pool.query(
-      'INSERT INTO usuarios (nombre, apellido, email, contrasena, rol_id) VALUES (?, ?, ?, ?, ?)', // Ajusta los nombres de las columnas
-      [firstName, lastName, email, hashedPassword, role || 2] // Asigna un rol por defecto (ej: 2 para 'usuario')
+    const empleadoIdNumber = empleado_id ? Number(empleado_id) : null;
+
+
+  const [result] = await pool.query(
+  `INSERT INTO usuarios (nombre_usuario, apellido, contrasena, rol_id, empleado_id, activo, recordar_sesion, fecha_creacion) 
+   VALUES (?, ?, ?, ?, ?, 1, 0, NOW())`,
+  [nombre_usuario, apellido, hashedPassword, rol_id || 2,  empleadoIdNumber] // activo=1, recordar_sesion=0 // Asigna un rol por defecto (ej: 2 para 'usuario')
     );
 
     const userId = result.insertId;
 
     // Crear un token JWT para el usuario recién registrado (opcional)
     const token = jwt.sign(
-      { id: userId, email: email, rol_id: role || 2 }, // Ajusta la información del payload
+      { id: userId, email: email, rol_id: role_id || 2 }, // Ajusta la información del payload
       process.env.JWT_SECRET,
       { expiresIn: '1h' }
     );
@@ -40,26 +44,26 @@ exports.register = async (req, res) => {
       token: token,
       user: {
         id: userId,
-        firstName: firstName,
-        lastName: lastName,
+        nombre_usuario: nombre_usuario,
+        apellido: apellido,
         email: email,
-        role: role || 2
+        rol_id: rol_id || 2
       }
     });
 
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Error al registrar usuario' });
-  }
+ } catch (error) {
+  console.error('Error al registrar usuario:', error);
+  res.status(500).json({ message: 'Error al registrar usuario' });
+}
 };
 
 // Función para el login
 exports.login = async (req, res) => {
-  const { nombre_usuario, contrasena } = req.body;
+  const { email, contrasena } = req.body;
 
   try {
     // Buscar al usuario en la base de datos
-    const [rows] = await pool.query('SELECT * FROM usuarios WHERE nombre_usuario = ?', [nombre_usuario]);
+    const [rows] = await pool.query('SELECT * FROM usuarios WHERE email = ?', [email]);
 
     if (rows.length === 0) {
       return res.status(404).json({ message: 'Usuario no encontrado' });
@@ -89,7 +93,7 @@ exports.login = async (req, res) => {
   }
     });
   } catch (error) {
-    console.error(error);
+      console.error('Error en register:', error);
     res.status(500).json({ message: 'Error al realizar login' });
   }
 };

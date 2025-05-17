@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../../src/styles/Register.css'; // Asegúrate de tener la ruta correcta para los estilos
-
+//hola
 const LoginForm = () => {
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    role: '',
-    password: ''
+    nombre_usuario: '',
+    apellido: '',
+    email:'',
+    password:'',
+    rol_id: '2',
+    empleado_Id: '0'
   });
 
   // Manejo del cambio en los inputs
@@ -23,9 +24,17 @@ const navigate = useNavigate();
 
 const handleSubmit = async (e) => {
   e.preventDefault();
-  console.log(formData);
+
+ const dataToSend = {
+    ...formData,
+    role: Number(formData.role),
+    empleado_Id: Number(formData.empleado_Id) // si quieres asegurar que empleadoId sea número
+  };
+  
+  console.log('Datos a enviar:', dataToSend);
+  
    try {
-      const response = await fetch('/api/auth/register', { // <-- ¡Asegúrate de que la URL sea esta!
+      const response = await fetch('http://localhost:3000/api/auth/register', { // <-- ¡Asegúrate de que la URL sea esta!
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -68,21 +77,21 @@ const handleSubmit = async (e) => {
             autoFocus
             pattern='[a-za-z0-9\s]{3,50}'
             type="text"
-            id="firstName"
-            name="firstName"
-            value={formData.firstName}
+            id="nombre_usuario"
+            name="nombre_usuario"
+            value={formData.nombre_usuario}
             onChange={handleChange}
             required
           />
         </div>
 
         <div className="form-group">
-          <label htmlFor="lastName">Apellidos:</label>
+          <label htmlFor="apellido">Apellido:</label>
           <input
             type="text"
-            id="lastName"
-            name="lastName"
-            value={formData.lastName}
+            id="apellido"
+            name="apellido"
+            value={formData.apellido}
             onChange={handleChange}
             required
           />
@@ -103,17 +112,17 @@ const handleSubmit = async (e) => {
         <div className="form-group">
           <label htmlFor="role">Rol de Empresa:</label>
           <select
-            id="role"
-            name="role"
-            value={formData.role}
+            id="rol_id"
+            name="rol_id"
+            value={formData.rol_id}
             onChange={handleChange}
             required
           >
             <option value="">Seleccione un rol</option>
-            <option value="administrador">Administrador</option>
-            <option value="contable">Contable</option>
-            <option value="produccion">Producción</option>
-            <option value="bodega">Bodega</option>
+            <option value='1'>Administrador</option>
+            <option value='2'>Contable</option>
+            <option value="3">Producción</option>
+            <option value="4">Bodega</option>
           </select>
         </div>
 
